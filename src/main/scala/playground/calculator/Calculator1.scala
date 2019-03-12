@@ -90,39 +90,40 @@ object FreeCalc {
 
 object FreeCalc2 {
 
-
   trait Expression2[A] extends Product with Serializable
   case class Lit[A](a: Int) extends Expression2[A]
-  case class Add[A](a: Expression2[A], b: Expression2[A]) extends Expression2[A]
-  case class Mult[A](a: Expression2[A], b: Expression2[A]) extends Expression2[A]
+  case class Add[A](a: A, b: A) extends Expression2[A]
+  case class Mult[A](a: A, b: A) extends Expression2[A]
 
   type ExprAlg[B] = Free[Expression2, B]
 
   def lit[A](a: Int): ExprAlg[A] = Free.liftF(Lit(a))
 
-  def add[A](a: Expression2[A], b: Expression2[A]): ExprAlg[A] = Free.liftF(Add(a, b))
+  def add[A](a: A, b: A): ExprAlg[A] = Free.liftF(Add(a, b))
 
-  def mult[A](a: Expression2[A], b: Expression2[A]): ExprAlg[A] = Free.liftF(Mult(a, b))
+  def mult[A](a: A, b: A): ExprAlg[A] = Free.liftF(Mult(a, b))
 
   def eval: Expression2 ~> Id = new (Expression2 ~> Id) {
-    override def apply[A](fa: Expression2[A]): Id[A] = eval(fa).asInstanceOf[Id[A]]
+    override def apply[A](fa: Expression2[A]): Id[A] = eval(fa).asInstanceOf[A]
 
     def eval[A](expression2: Expression2[A]): Int = expression2 match {
       case Lit(n) => n
-      case Add(a, b) => eval(a) + eval(b)
-      case Mult(a, b) =>eval(a) * eval(b)
+      case Add(a, b) => a.asInstanceOf[Int] + b.asInstanceOf[Int]
+      case Mult(a, b) => a.asInstanceOf[Int] * b.asInstanceOf[Int]
     }
   }
 
   def print: Expression2 ~> Id = new (Expression2 ~> Id) {
-    override def apply[A](fa: Expression2[A]): Id[A] = eval(fa.asInstanceOf).asInstanceOf
+      override def apply[A](fa: Expression2[A]): Id[A] = eval(fa).asInstanceOf[A]
 
-    def eval[A](expression2: Expression2[String]): String = expression2 match {
-      case Lit(n) => n.toString
-      case Add(a, b) => "(" + a.toString + " + " + b.toString + ")"
-      case Mult(a, b) => "(" + a.toString + " * " + b.toString + ")"
+      def eval[A](expression2: Expression2[A]): String = expression2 match {
+        case Lit(n) => n.toString
+        case Add(a, b) => "(" + a.toString + " + " + b.toString + ")"
+        case Mult(a, b) => "(" + a.toString + " * " + b.toString + ")"
+      }
     }
-  }
+
+
 }
 
 

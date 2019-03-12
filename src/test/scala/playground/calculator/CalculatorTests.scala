@@ -51,14 +51,14 @@ class CalculatorTests extends FeatureSpec with Matchers {
   scenario("Free Monad ----= 2 =----") {
     import FreeCalc2._
 
-    val program = for {
-      two <- lit[Int](2)
-      four <- lit[Int](4)
-      sum <- add[Int](two, four)
+    def program[A] = for {
+      two <- lit[A](2)
+      four <- lit[A](4)
+      sum <- add(two, four)
     } yield sum
 
-    program.foldMap(eval) shouldBe 6
-    program.foldMap(print) shouldBe "(2 + 4)"
+    program[Int].foldMap(eval) shouldBe 6
+    program[String].foldMap(print) shouldBe "(2 + 4)"
   }
 
   scenario("Tagless Final") {
