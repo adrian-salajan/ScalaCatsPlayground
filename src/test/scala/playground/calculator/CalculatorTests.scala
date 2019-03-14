@@ -4,6 +4,8 @@ import cats.free.Free
 import org.scalatest.{FeatureSpec, Matchers}
 import playground.calculator.TaglessCalc.TagCalc
 
+import scala.io.StdIn
+
 class CalculatorTests extends FeatureSpec with Matchers {
 
   scenario("calculator 1") {
@@ -59,6 +61,9 @@ class CalculatorTests extends FeatureSpec with Matchers {
 
     program[Int].foldMap(eval) shouldBe 6
     program[String].foldMap(print) shouldBe "(2 + 4)"
+
+    import cats.instances.option._
+    program[Option[Int]].foldMap(evalOpt) shouldBe Option(6)
   }
 
   scenario("Tagless Final") {
@@ -68,5 +73,6 @@ class CalculatorTests extends FeatureSpec with Matchers {
     program(TaglessCalc.evalOpt) shouldBe Option(20)
     program(TaglessCalc.print) shouldBe "(2 * (4 + 6))"
   }
+
 
 }

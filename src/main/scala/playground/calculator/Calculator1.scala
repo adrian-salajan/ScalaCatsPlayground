@@ -1,7 +1,10 @@
 package playground.calculator
 
 import cats.free.Free
-import cats.{Id, ~>}
+import cats.{Id, Inject, ~>}
+
+import scala.Option
+import scala.io.StdIn
 
 class Calculator1 {
   def add(a: Int, b: Int): Int = a + b
@@ -17,6 +20,7 @@ object CalculatorDeepEmbeding {
   case class Add(a: Expression, b:Expression) extends Expression
   case class Mult(a: Expression, b: Expression) extends Expression
   case class Subtract(a: Expression, b: Expression) extends Expression
+  case object ReadInt extends Expression
 
   trait Calculator2[R] {
     def run(e: Expression): R
@@ -27,6 +31,9 @@ object CalculatorDeepEmbeding {
       case Lit(a) => a
       case Add(a, b) => run(a) + run(b)
       case Mult(a, b) => run(a) * run(b)
+      case ReadInt =>
+        println("read int = ")
+        StdIn.readInt()
     }
   }
 
@@ -110,6 +117,16 @@ object FreeCalc2 {
       case Lit(n) => n
       case Add(a, b) => a.asInstanceOf[Int] + b.asInstanceOf[Int]
       case Mult(a, b) => a.asInstanceOf[Int] * b.asInstanceOf[Int]
+    }
+  }
+
+  def evalOpt: Expression2 ~> Option = new (Expression2 ~> Option) {
+    override def apply[A](fa: Expression2[A]): Option[A] = eval(fa).map{_.asInstanceOf[A]}
+
+    def eval[A](expression2: Expression2[A]): Option[Int] = expression2 match {
+      case Lit(n) => Option(n)
+      case Add(a, b) => Option(a.asInstanceOf[Int] + b.asInstanceOf[Int])
+      case Mult(a, b) => Option(a.asInstanceOf[Int] * b.asInstanceOf[Int])
     }
   }
 
